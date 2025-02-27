@@ -60,15 +60,14 @@ class Product(models.Model):
             else:
                 return ''
             
-    
 
-    def save(self, *args, **kwargs):
-        if self.image:
-            img = Image.open(self.image)
-            if img.height > 300 or img.width > 300:
-                output_size = (300, 300)
-                img.thumbnail(output_size)
-                in_mem_file = BytesIO()
-                img.save(in_mem_file, 'JPEG')
-                self.image = File(in_mem_file, name=f'{self.image.name}')
-        super().save(*args, **kwargs)
+    def make_thumbnail(self, image, size=(300, 200)):
+        img = Image.open(image)
+        img.convert('RGB')
+        img.thumbnail(size)
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, 'JPEG', quality=85)
+
+        thumbnail = File(thumb_io, name=image.name)
+        return thumbnail
